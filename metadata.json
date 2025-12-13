@@ -1,0 +1,5 @@
+{
+  "name": "ĐỀ THI SINH ĐỀ THI VER3",
+  "description": "A professional AI assistant for High School Math teachers. Analyzes sample exam PDFs and generates similar exams with new data and contexts while preserving structure and difficulty.",
+  "requestFramePermissions": []
+}
