@@ -294,9 +294,11 @@ const App: React.FC = () => {
               <RotateCcw size={32} />
             </div>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">Đã xảy ra lỗi</h3>
-            <p className="text-slate-600 mb-8">
-              Không thể xử lý đề thi này. Vui lòng kiểm tra lại file hoặc thử lại sau.<br />
-              <span className="text-sm text-slate-500">Gợi ý: Kiểm tra API Key hoặc file đầu vào.</span>
+            <p className="text-slate-600 mb-4 font-medium text-red-600">
+              {errorMessage || "Không thể xử lý đề thi này. Vui lòng kiểm tra lại file hoặc thử lại sau."}
+            </p>
+            <p className="text-sm text-slate-500 mb-8">
+              Gợi ý: Kiểm tra API Key (đảm bảo key hợp lệ) hoặc file đầu vào.
             </p>
             <button
               onClick={resetApp}
