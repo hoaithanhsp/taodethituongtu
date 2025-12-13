@@ -8,6 +8,7 @@ import { BookOpen, Copy, RotateCcw, BrainCircuit, FileSpreadsheet, CheckCircle, 
 const App: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
   const [result, setResult] = useState<GeneratedContent | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'analysis' | 'exam1' | 'exam2'>('analysis');
   const [fileName, setFileName] = useState<string>('');
   const [apiKey, setApiKey] = useState<string>('');
@@ -39,6 +40,7 @@ const App: React.FC = () => {
 
     setStatus(AppStatus.ANALYZING);
     setFileName(fileData.name);
+    setErrorMessage('');
     try {
       const generatedContent = await generateExams(apiKey, fileData.base64, fileData.mimeType);
       setResult(generatedContent);
@@ -46,9 +48,14 @@ const App: React.FC = () => {
     } catch (error) {
       console.error(error);
       setStatus(AppStatus.ERROR);
-      if (error instanceof Error && error.message.includes("API Key")) {
-        alert(error.message);
-        setShowSettings(true);
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+        if (error.message.includes("API Key")) {
+          alert(error.message);
+          setShowSettings(true);
+        }
+      } else {
+        setErrorMessage("Đã xảy ra lỗi không xác định.");
       }
     }
   };
@@ -57,6 +64,7 @@ const App: React.FC = () => {
     setStatus(AppStatus.IDLE);
     setResult(null);
     setFileName('');
+    setErrorMessage('');
     setActiveTab('analysis');
   };
 
