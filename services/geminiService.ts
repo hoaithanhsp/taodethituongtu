@@ -4,18 +4,18 @@ import { GeneratedContent } from "../types";
 
 export const generateExams = async (
   apiKey: string,
-  base64Data: string, 
+  base64Data: string,
   mimeType: string
 ): Promise<GeneratedContent> => {
   try {
     if (!apiKey) {
       throw new Error("Vui lòng nhập Gemini API Key để tiếp tục.");
     }
-    
+
     const ai = new GoogleGenAI({ apiKey });
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-1.5-flash',
       contents: {
         role: 'user',
         parts: [
