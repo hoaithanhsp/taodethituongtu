@@ -27,7 +27,7 @@ export const generateExams = async (
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-1.5-flash-latest', // More stable than 2.5-flash
+        model: 'gemini-1.5-flash', // Stable and reliable model
         contents: {
           role: 'user',
           parts: [
