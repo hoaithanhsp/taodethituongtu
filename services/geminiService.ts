@@ -27,7 +27,7 @@ export const generateExams = async (
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash', // Latest model with retry logic
+        model: 'gemini-3-pro-preview', // Latest model with retry logic
         contents: {
           role: 'user',
           parts: [
