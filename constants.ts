@@ -57,4 +57,17 @@ Hãy trả về kết quả dưới dạng JSON với cấu trúc sau (không d�
   - Inline: $x^2 + y^2 = r^2$
   - Display: $$ \int_{a}^{b} f(x)dx = F(b) - F(a) $$
 - Hình vẽ TikZ: Xuất dạng mã TikZ hoàn chỉnh trong block code \`\`\`latex ... \`\`\`
-`;
+
+## ⚠️ ĐỊNH DẠNG BẮT BUỘC CHO EXAM1 VÀ EXAM2:
+Xuất kết quả dưới dạng **Bảng Markdown (Markdown Table) 2 cột**:
+| Câu hỏi (kèm hình/TikZ) | Lời giải chi tiết |
+| :--- | :--- |
+| **Câu 1:** [Nội dung câu hỏi...] | [Lời giải chi tiết...] |
+| **Câu 2:** ... | ... |
+
+**LƯU Ý QUAN TRỌNG VỀ LATEX TRONG BẢNG:**
+1. Tuyệt đối **KHÔNG** dùng ký tự `| ` trong công thức Toán/TikZ vì sẽ làm vỡ bảng Markdown.
+2. Hãy thay thế `| ` bằng `\\vert` hoặc `\\lvert`, `\\rvert` trong LaTeX.
+   - Ví dụ SAI: $|x| < 3$
+   - Ví dụ ĐÚNG: $\\lvert x \\rvert < 3$
+3. Mỗi câu hỏi là một hàng trong bảng.`;
