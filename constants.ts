@@ -39,6 +39,7 @@ QUY TẮC SINH ĐỀ
 - Với tự luận: Lời giải chi tiết từng bước, biểu điểm rõ ràng.
 - Tránh đáp án quá lẻ hoặc quá phức tạp.
 - Ưu tiên số nguyên, phân số tối giản, căn thức đơn giản.
+- BẮT BUỘC có lời giải chi tiết cho các câu mức Thông hiểu, Vận dụng, Vận dụng cao.
 
 ═══════════════════════════════════════
 ĐỊNH DẠNG XUẤT RA
