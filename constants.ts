@@ -69,10 +69,24 @@ Vui lòng trình bày theo cấu trúc tách biệt rõ ràng 2 phần:
 ---
 
 ### PHẦN 2: HƯỚNG DẪN GIẢI CHI TIẾT
-[Trình bày lời giải chi tiết tương ứng cho từng câu ở dưới này]
+
+#### I. BẢNG ĐÁP ÁN NHANH (BẮT BUỘC CÓ)
+**1. Trắc nghiệm nhiều phương án:**
+Câu 1: A | Câu 2: B | Câu 3: C | ...
+
+**2. Trắc nghiệm Đúng/Sai:**
+Câu ...: a) Đ; b) S; c) Đ; d) S
+Câu ...: a) S; b) S; c) Đ; d) Đ
+
+**3. Trả lời ngắn:**
+Câu ...: Đáp số là ...
+Câu ...: Đáp số là ...
+
+#### II. LỜI GIẢI CHI TIẾT (BẮT BUỘC GIẢI TẤT CẢ CÁC CÂU)
+[Trình bày lời giải chi tiết, rõ ràng cho từng câu hỏi, bao gồm cả câu dễ]
 **Câu 1:**
 - Phương pháp: ...
 - Lời giải: ...
 
-**Câu 2:**
+**Câu ...:**
 ...`;
