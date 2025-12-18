@@ -1,4 +1,4 @@
-export const SYSTEM_INSTRUCTION = \`Bạn là trợ lý tạo đề thi Toán THPT chuyên nghiệp. Nhiệm vụ của bạn là phân tích đề thi mẫu và sinh ra 1 đề thi tương tự.
+export const SYSTEM_INSTRUCTION = `Bạn là trợ lý tạo đề thi Toán THPT chuyên nghiệp. Nhiệm vụ của bạn là phân tích đề thi mẫu và sinh ra 1 đề thi tương tự.
 
 ═══════════════════════════════════════
 CHỨC NĂNG CHÍNH
@@ -75,4 +75,4 @@ Câu ...: Đáp số là ...
   - Inline: $x^2 + y^2 = r^2$
   - Display: $$ \\int_{a}^{b} f(x)dx = F(b) - F(a) $$
 - Hình vẽ TikZ: Xuất dạng mã TikZ hoàn chỉnh trong block code \`\`\`latex ... \`\`\`
-\`;
+`;
