@@ -2,32 +2,31 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from "../constants";
 import { GeneratedContent } from "../types";
 
-// Get API key with priority: localStorage > environment variable
-const getApiKey = (): string => {
-  const userApiKey = localStorage.getItem('gemini_api_key');
-  return userApiKey || process.env.API_KEY || '';
-};
+const MODELS = [
+  'gemini-3-pro-preview',
+  'gemini-3-flash-preview',
+  'gemini-2.5-flash',
+  'gemini-2.5-pro'
+];
 
 export const generateExams = async (
   base64Data: string,
-  mimeType: string
+  mimeType: string,
+  userApiKey?: string
 ): Promise<GeneratedContent> => {
-  const apiKey = getApiKey();
-
+  const apiKey = userApiKey || process.env.API_KEY || '';
   if (!apiKey) {
-    throw new Error("API key is missing. Please provide your Gemini API key.");
+    throw new Error("Vui lòng nhập Gemini API Key trong phần Cài đặt");
   }
 
   const ai = new GoogleGenAI({ apiKey });
+  let lastError: any = null;
 
-  // Retry logic for 503 errors
-  const maxRetries = 2;
-  let lastError: any;
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+  for (const modelName of MODELS) {
     try {
+      console.log(`Trying model: ${modelName}`);
       const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview', // Latest model with retry logic
+        model: modelName,
         contents: {
           role: 'user',
           parts: [
@@ -44,7 +43,7 @@ export const generateExams = async (
         },
         config: {
           systemInstruction: SYSTEM_INSTRUCTION,
-          temperature: 0.5, // Balanced for creativity but strict on structure
+          temperature: 0.5,
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -73,42 +72,12 @@ export const generateExams = async (
       const result = JSON.parse(text) as GeneratedContent;
       return result;
 
-    } catch (error: any) {
+    } catch (error) {
+      console.warn(`Model ${modelName} failed:`, error);
       lastError = error;
-
-      // If it's a 503 error and we have retries left, wait and retry
-      if ((error.status === 503 || error.message?.includes('overloaded') || error.message?.includes('UNAVAILABLE')) && attempt < maxRetries) {
-        const waitTime = (attempt + 1) * 2000; // 2s, 4s
-        console.log(`Attempt ${attempt + 1} failed with 503. Retrying in ${waitTime}ms...`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        continue; // Retry
-      }
-
-      // For other errors or last attempt, break and handle below
-      break;
+      // Continue to next model
     }
   }
 
-  // Handle the error after all retries exhausted
-  console.error("Gemini API Error:", lastError);
-
-  // Provide detailed error messages for common issues
-  if (lastError.status === 503 || lastError.message?.includes('overloaded') || lastError.message?.includes('UNAVAILABLE')) {
-    throw new Error("Model đang quá tải (503 - UNAVAILABLE). Gemini AI đang xử lý quá nhiều request. Vui lòng thử lại sau 30-60 giây.");
-  }
-  if (lastError.message?.includes('RESOURCE_EXHAUSTED') || lastError.status === 429) {
-    throw new Error("RESOURCE_EXHAUSTED: API quota exceeded. Please check your API key limits.");
-  }
-  if (lastError.status === 403) {
-    throw new Error("API key not valid or permission denied (403). Please verify your API key.");
-  }
-  if (lastError.status === 400) {
-    throw new Error(`Bad Request (400): ${lastError.message || 'Invalid request parameters'}`);
-  }
-  if (lastError.message?.includes('API key')) {
-    throw new Error(`API Key Error: ${lastError.message}`);
-  }
-
-  // Return the original error message for other cases
-  throw new Error(lastError.message || "Unknown error occurred while generating exams");
+  throw lastError || new Error("All models failed");
 };
