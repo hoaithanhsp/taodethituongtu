@@ -199,7 +199,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-white/80 border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -396,6 +396,45 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      <footer className="mt-auto py-10 bg-white border-t border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="mb-6 bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+            <p className="text-lg font-bold text-slate-800 mb-2">
+              ĐĂNG KÝ KHOÁ HỌC THỰC CHIẾN VIẾT SKKN, TẠO APP DẠY HỌC, TẠO MÔ PHỎNG TRỰC QUAN CHỈ VỚI 1 CÂU LỆNH
+            </p>
+            <a
+              href="https://tinyurl.com/khoahocAI2025"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-lg text-blue-600 font-bold hover:text-blue-700 hover:underline"
+            >
+              https://tinyurl.com/khoahocAI2025
+            </a>
+          </div>
+
+          <div className="text-slate-600 space-y-2">
+            <p className="font-semibold text-slate-800">Mọi thông tin vui lòng liên hệ:</p>
+            <div className="space-y-1">
+              <p>
+                <span className="font-medium mr-2">FB:</span>
+                <a
+                  href="https://www.facebook.com/tranhoaithanhvicko/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  https://www.facebook.com/tranhoaithanhvicko/
+                </a>
+              </p>
+              <p>
+                <span className="font-medium mr-2">Zalo:</span>
+                <span className="font-bold text-slate-900">0348296773</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* API Key Modal */}
       {(isSettingsOpen || !apiKey) && (
