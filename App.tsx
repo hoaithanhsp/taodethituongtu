@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { MarkdownResult } from './components/MarkdownResult';
-import { ApiKeyModal } from './components/ApiKeyModal';
 import { generateExams } from './services/geminiService';
 import { AppStatus, GeneratedContent, FileData } from './types';
 import { BookOpen, Copy, RotateCcw, BrainCircuit, FileSpreadsheet, CheckCircle, Download, Settings } from 'lucide-react';
@@ -11,36 +10,40 @@ const App: React.FC = () => {
   const [result, setResult] = useState<GeneratedContent | null>(null);
   const [activeTab, setActiveTab] = useState<'analysis' | 'exam1' | 'exam2'>('analysis');
   const [fileName, setFileName] = useState<string>('');
-  const [showApiKeyModal, setShowApiKeyModal] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [apiKey, setApiKey] = useState<string>('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [errorDetail, setErrorDetail] = useState<string>('');
 
-  // Check for API key on mount
-  useEffect(() => {
-    const apiKey = localStorage.getItem('gemini_api_key');
-    if (!apiKey) {
-      setShowApiKeyModal(true);
-    }
+  React.useEffect(() => {
+    const storedKey = localStorage.getItem('GEMINI_API_KEY');
+    if (storedKey) setApiKey(storedKey);
+    else setIsSettingsOpen(true);
   }, []);
 
+  const saveApiKey = (key: string) => {
+    localStorage.setItem('GEMINI_API_KEY', key);
+    setApiKey(key);
+    setIsSettingsOpen(false);
+  };
+
   const handleFileSelect = async (fileData: FileData) => {
-    // Check for API key before processing
-    const apiKey = localStorage.getItem('gemini_api_key');
     if (!apiKey) {
-      setShowApiKeyModal(true);
+      setIsSettingsOpen(true);
       return;
     }
 
     setStatus(AppStatus.ANALYZING);
     setFileName(fileData.name);
-    setErrorMessage('');
+    setErrorDetail('');
+
     try {
-      const generatedContent = await generateExams(fileData.base64, fileData.mimeType);
+      const generatedContent = await generateExams(fileData.base64, fileData.mimeType, apiKey);
       setResult(generatedContent);
       setStatus(AppStatus.SUCCESS);
     } catch (error: any) {
       console.error(error);
-      setErrorMessage(error.message || 'Đã xảy ra lỗi không xác định');
       setStatus(AppStatus.ERROR);
+      setErrorDetail(error.message || JSON.stringify(error));
     }
   };
 
@@ -49,7 +52,7 @@ const App: React.FC = () => {
     setResult(null);
     setFileName('');
     setActiveTab('analysis');
-    setErrorMessage('');
+    setErrorDetail('');
   };
 
   const handleExportPDF = () => {
@@ -150,6 +153,14 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all"
+              title="Cài đặt API Key"
+            >
+              <Settings size={20} />
+            </button>
+
             {status === AppStatus.SUCCESS && (
               <button
                 onClick={resetApp}
@@ -159,13 +170,6 @@ const App: React.FC = () => {
                 <span>Tạo đề mới</span>
               </button>
             )}
-            <button
-              onClick={() => setShowApiKeyModal(true)}
-              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-full transition-all"
-              title="Cấu hình API Key"
-            >
-              <Settings size={16} />
-            </button>
           </div>
         </div>
       </header>
@@ -223,25 +227,15 @@ const App: React.FC = () => {
               <RotateCcw size={32} />
             </div>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">Đã xảy ra lỗi</h3>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 mx-auto max-w-lg">
-              <p className="text-sm font-mono text-red-800 break-words">
-                {errorMessage || 'Không thể xử lý đề thi này. Vui lòng kiểm tra lại file hoặc thử lại sau.'}
-              </p>
-            </div>
-            <div className="flex justify-center space-x-3">
-              <button
-                onClick={resetApp}
-                className="px-6 py-3 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
-              >
-                Thử lại
-              </button>
-              <button
-                onClick={() => setShowApiKeyModal(true)}
-                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
-              >
-                Kiểm tra API Key
-              </button>
-            </div>
+            <p className="text-slate-600 mb-4 px-4">
+              {errorDetail || "Không thể xử lý đề thi này. Vui lòng kiểm tra lại file hoặc thử lại sau."}
+            </p>
+            <button
+              onClick={resetApp}
+              className="px-6 py-3 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
+            >
+              Thử lại
+            </button>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">
@@ -333,13 +327,59 @@ const App: React.FC = () => {
       </main>
 
       {/* API Key Modal */}
-      <ApiKeyModal
-        isOpen={showApiKeyModal}
-        onClose={() => setShowApiKeyModal(false)}
-        onSave={(key) => {
-          console.log('API Key saved:', key.substring(0, 10) + '...');
-        }}
-      />
+      {(isSettingsOpen || !apiKey) && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-blue-600" />
+                Cài đặt API Key
+              </h3>
+              {apiKey && (
+                <button
+                  onClick={() => setIsSettingsOpen(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <RotateCcw className="w-5 h-5 rotate-45" />
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-sm text-slate-600">
+                Để sử dụng MathGenius AI, bạn cần cung cấp Gemini API Key của riêng mình (Google AI Studio).
+              </p>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Gemini API Key
+                </label>
+                <input
+                  type="password"
+                  placeholder="AIzaSy..."
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => saveApiKey(apiKey)}
+                  disabled={!apiKey}
+                  className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Lưu & Bắt đầu
+                </button>
+              </div>
+
+              <p className="text-xs text-center text-slate-400 mt-4">
+                Key được lưu cục bộ trên trình duyệt của bạn (LocalStorage).
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
