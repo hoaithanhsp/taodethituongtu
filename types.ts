@@ -7,8 +7,8 @@ export enum AppStatus {
 
 export interface GeneratedContent {
   analysis: string;
-  exam1: string;
-  exam2: string;
+  examContent: string;
+  detailedSolution: string;
 }
 
 export interface FileData {
