@@ -14,7 +14,7 @@ import remarkGfm from 'remark-gfm';
 const App: React.FC = () => {
   const [status, setStatus] = useState<AppStatus>(AppStatus.IDLE);
   const [result, setResult] = useState<GeneratedContent | null>(null);
-  const [activeTab, setActiveTab] = useState<'analysis' | 'exam1' | 'exam2'>('analysis');
+  const [activeTab, setActiveTab] = useState<'analysis' | 'examContent' | 'detailedSolution'>('analysis');
   const [fileName, setFileName] = useState<string>('');
   const [apiKey, setApiKey] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -78,6 +78,7 @@ const App: React.FC = () => {
     setResult(null);
     setFileName('');
     setFileData(null);
+    setFileData(null);
     setActiveTab('analysis');
     setErrorDetail('');
   };
@@ -93,7 +94,7 @@ const App: React.FC = () => {
     }
 
     const title = activeTab === 'analysis' ? 'Phân tích Ma trận' :
-      activeTab === 'exam1' ? 'Đề thi số 1' : 'Đề thi số 2';
+      activeTab === 'examContent' ? 'Đề thi' : 'Lời giải chi tiết';
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -163,8 +164,21 @@ const App: React.FC = () => {
   };
 
   const handleExportWord = async () => {
-    const content = activeTab === 'analysis' ? result?.analysis :
-      activeTab === 'exam1' ? result?.exam1 : result?.exam2;
+    // If exporting Solution, we prepend the Exam Content for context? Or just export what is seen?
+    // User requested "Part 1 Exam, Part 2 Solution" format in export.
+    // Let's check which tab is active.
+
+    let content = '';
+    if (activeTab === 'analysis') {
+      content = result?.analysis || '';
+    } else {
+      // If on Exam or Solution tab, export BOTH combined for a complete document
+      // matching the "Step 1, Step 2" requirement in the file.
+      if (result) {
+        content = result.examContent + '\n\n---\n\n' + result.detailedSolution;
+      }
+    }
+
     if (!content) return;
 
     try {
@@ -229,8 +243,11 @@ const App: React.FC = () => {
       }) as Blob;
 
       // 4. Save file
+      // const docName is already declared? No it's block scoped.
+      // Wait, replacement chunk had duplicate.
       const docName = fileName ? fileName.replace(/\.[^/.]+$/, "") : "de-thi";
-      const suffix = activeTab === 'analysis' ? 'phan-tich' : activeTab === 'exam1' ? 'de-1' : 'de-2';
+
+      const suffix = activeTab === 'analysis' ? 'phan-tich' : 'de-va-loi-giai';
       saveAs(blob, `${docName}_${suffix}.docx`);
 
     } catch (error) {
@@ -391,8 +408,8 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 text-left">
               {[
                 { icon: FileSpreadsheet, title: "Phân tích Ma trận", desc: "Tự động nhận diện mức độ nhận biết, thông hiểu, vận dụng." },
-                { icon: Copy, title: "Sinh đề song song", desc: "Tạo 2 đề mới giữ nguyên cấu trúc nhưng thay đổi số liệu." },
-                { icon: CheckCircle, title: "Đáp án chi tiết", desc: "Kèm lời giải chi tiết và mã TikZ cho hình học." },
+                { icon: Copy, title: "Sinh đề tương tự", desc: "Tạo 1 đề mới giữ nguyên cấu trúc nhưng thay đổi số liệu." },
+                { icon: CheckCircle, title: "Đáp án chi tiết", desc: "Kèm lời giải chi tiết và bảng đáp án nhanh." },
               ].map((feature, idx) => (
                 <div key={idx} className="p-6 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                   <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 mb-4">
@@ -436,8 +453,8 @@ const App: React.FC = () => {
                   <nav className="flex flex-col space-y-1">
                     {[
                       { id: 'analysis', label: 'Phân tích Ma trận', icon: FileSpreadsheet },
-                      { id: 'exam1', label: 'Đề đề xuất #1', icon: BookOpen },
-                      { id: 'exam2', label: 'Đề đề xuất #2', icon: BookOpen },
+                      { id: 'examContent', label: 'Đề thi (Bước 1)', icon: BookOpen },
+                      { id: 'detailedSolution', label: 'Lời giải (Bước 2)', icon: List },
                     ].map((tab) => (
                       <button
                         key={tab.id}
@@ -508,8 +525,8 @@ const App: React.FC = () => {
                 <div className="mb-6 pb-4 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4">
                   <h2 className="text-2xl font-bold text-slate-900">
                     {activeTab === 'analysis' && 'Phân tích Đề thi'}
-                    {activeTab === 'exam1' && 'Đề thi Đề xuất 01'}
-                    {activeTab === 'exam2' && 'Đề thi Đề xuất 02'}
+                    {activeTab === 'examContent' && 'NỘI DUNG ĐỀ THI'}
+                    {activeTab === 'detailedSolution' && 'HƯỚNG DẪN GIẢI CHI TIẾT'}
                   </h2>
 
                   <div className="flex items-center space-x-2">
@@ -532,7 +549,7 @@ const App: React.FC = () => {
                     <button
                       onClick={() => {
                         const text = activeTab === 'analysis' ? result?.analysis :
-                          activeTab === 'exam1' ? result?.exam1 : result?.exam2;
+                          activeTab === 'examContent' ? result?.examContent : result?.detailedSolution;
                         if (text) navigator.clipboard.writeText(text);
                       }}
                       className="flex items-center space-x-1 px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
@@ -550,12 +567,12 @@ const App: React.FC = () => {
                     <MarkdownResult content={result.analysis} />
                   )}
 
-                  {activeTab === 'exam1' && result && (
-                    <MarkdownResult content={result.exam1} />
+                  {activeTab === 'examContent' && result && (
+                    <MarkdownResult content={result.examContent} />
                   )}
 
-                  {activeTab === 'exam2' && result && (
-                    <MarkdownResult content={result.exam2} />
+                  {activeTab === 'detailedSolution' && result && (
+                    <MarkdownResult content={result.detailedSolution} />
                   )}
                 </div>
               </div>
