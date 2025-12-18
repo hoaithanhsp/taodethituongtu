@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { MarkdownResult } from './components/MarkdownResult';
 import { generateExams } from './services/geminiService';
-import { AppStatus, GeneratedContent, FileData } from './types';
-import { BookOpen, Copy, RotateCcw, BrainCircuit, FileSpreadsheet, CheckCircle, Download, Settings, FileText } from 'lucide-react';
+import { AppStatus, GeneratedContent, FileData, DiagramMode, SolutionMode } from './types';
+import { BookOpen, Copy, RotateCcw, BrainCircuit, FileSpreadsheet, CheckCircle, Download, Settings, FileText, Sliders, Image, List } from 'lucide-react';
 import { saveAs } from 'file-saver';
 // @ts-ignore
 import { asBlob } from 'html-docx-js-typescript';
@@ -19,6 +19,10 @@ const App: React.FC = () => {
   const [apiKey, setApiKey] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [errorDetail, setErrorDetail] = useState<string>('');
+
+  // New State for Modes
+  const [diagramMode, setDiagramMode] = useState<DiagramMode>('standard');
+  const [solutionMode, setSolutionMode] = useState<SolutionMode>('detailed');
 
   React.useEffect(() => {
     const storedKey = localStorage.getItem('GEMINI_API_KEY');
@@ -43,7 +47,10 @@ const App: React.FC = () => {
     setErrorDetail('');
 
     try {
-      const generatedContent = await generateExams(fileData.base64, fileData.mimeType, apiKey);
+      const generatedContent = await generateExams(fileData.base64, fileData.mimeType, apiKey, {
+        diagramMode,
+        solutionMode
+      });
       setResult(generatedContent);
       setStatus(AppStatus.SUCCESS);
     } catch (error: any) {
@@ -249,6 +256,49 @@ const App: React.FC = () => {
               <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
                 Tải lên đề thi mẫu (PDF/Ảnh). AI sẽ phân tích cấu trúc, độ khó và sinh ra các đề tương tự chỉ trong giây lát.
               </p>
+            </div>
+
+            {/* Configuration Options */}
+            <div className="max-w-2xl mx-auto mb-8 bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-slate-200/60 text-left animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
+              <div className="flex items-center gap-2 mb-4 text-slate-800 font-semibold">
+                <Sliders size={18} className="text-blue-600" />
+                <h3>Cấu hình sinh đề</h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* Diagram Mode */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                    <Image size={16} className="text-slate-400" />
+                    Chất lượng hình vẽ
+                  </label>
+                  <select
+                    value={diagramMode}
+                    onChange={(e) => setDiagramMode(e.target.value as DiagramMode)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                  >
+                    <option value="standard">Tiêu chuẩn (Ưu tiên tốc độ)</option>
+                    <option value="detailed">Cao cấp (Chi tiết & Chính xác)</option>
+                  </select>
+                </div>
+
+                {/* Solution Mode */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                    <List size={16} className="text-slate-400" />
+                    Chi tiết lời giải
+                  </label>
+                  <select
+                    value={solutionMode}
+                    onChange={(e) => setSolutionMode(e.target.value as SolutionMode)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                  >
+                    <option value="concise">Ngắn gọn (Chỉ đáp án)</option>
+                    <option value="detailed">Tiêu chuẩn (Giải chi tiết)</option>
+                    <option value="very_detailed">Chuyên sâu (Giải thích & Mẹo)</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div className="bg-white p-2 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
