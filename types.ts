@@ -16,3 +16,11 @@ export interface FileData {
   mimeType: string;
   name: string;
 }
+
+export type DiagramMode = 'standard' | 'detailed';
+export type SolutionMode = 'concise' | 'detailed' | 'very_detailed';
+
+export interface GenerationOptions {
+  diagramMode: DiagramMode;
+  solutionMode: SolutionMode;
+}
