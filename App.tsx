@@ -20,6 +20,8 @@ const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [errorDetail, setErrorDetail] = useState<string>('');
 
+  const [fileData, setFileData] = useState<FileData | null>(null);
+
   // New State for Modes
   const [diagramMode, setDiagramMode] = useState<DiagramMode>('standard');
   const [solutionMode, setSolutionMode] = useState<SolutionMode>('detailed');
@@ -36,18 +38,24 @@ const App: React.FC = () => {
     setIsSettingsOpen(false);
   };
 
-  const handleFileSelect = async (fileData: FileData) => {
+  const handleFileSelect = async (data: FileData) => {
+    setFileData(data);
+    setFileName(data.name);
+    // Auto-generate on first upload
+    await handleGenerate(data);
+  };
+
+  const handleGenerate = async (data: FileData) => {
     if (!apiKey) {
       setIsSettingsOpen(true);
       return;
     }
 
     setStatus(AppStatus.ANALYZING);
-    setFileName(fileData.name);
     setErrorDetail('');
 
     try {
-      const generatedContent = await generateExams(fileData.base64, fileData.mimeType, apiKey, {
+      const generatedContent = await generateExams(data.base64, data.mimeType, apiKey, {
         diagramMode,
         solutionMode
       });
@@ -64,6 +72,7 @@ const App: React.FC = () => {
     setStatus(AppStatus.IDLE);
     setResult(null);
     setFileName('');
+    setFileData(null);
     setActiveTab('analysis');
     setErrorDetail('');
   };
@@ -354,31 +363,78 @@ const App: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-8 animate-in fade-in duration-500">
             {/* Sidebar / Tabs */}
             <div className="lg:w-64 flex-shrink-0">
-              <div className="sticky top-24 space-y-2">
-                <div className="px-4 py-3 bg-white rounded-xl shadow-sm border border-slate-200 mb-4">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">File gốc</p>
-                  <p className="text-sm font-medium text-slate-900 truncate" title={fileName}>{fileName}</p>
+              <div className="sticky top-24 space-y-6">
+
+                {/* File Info & Nav */}
+                <div className="space-y-2">
+                  <div className="px-4 py-3 bg-white rounded-xl shadow-sm border border-slate-200 mb-4">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">File gốc</p>
+                    <p className="text-sm font-medium text-slate-900 truncate" title={fileName}>{fileName}</p>
+                  </div>
+
+                  <nav className="flex flex-col space-y-1">
+                    {[
+                      { id: 'analysis', label: 'Phân tích Ma trận', icon: FileSpreadsheet },
+                      { id: 'exam1', label: 'Đề đề xuất #1', icon: BookOpen },
+                      { id: 'exam2', label: 'Đề đề xuất #2', icon: BookOpen },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === tab.id
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                          : 'text-slate-600 hover:bg-white hover:shadow-sm'
+                          }`}
+                      >
+                        <tab.icon size={18} />
+                        <span className="font-medium text-sm">{tab.label}</span>
+                      </button>
+                    ))}
+                  </nav>
                 </div>
 
-                <nav className="flex flex-col space-y-1">
-                  {[
-                    { id: 'analysis', label: 'Phân tích Ma trận', icon: FileSpreadsheet },
-                    { id: 'exam1', label: 'Đề đề xuất #1', icon: BookOpen },
-                    { id: 'exam2', label: 'Đề đề xuất #2', icon: BookOpen },
-                  ].map((tab) => (
+                {/* Quick Regen Config */}
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                  <div className="flex items-center gap-2 text-slate-800 font-semibold pb-2 border-b border-slate-100">
+                    <Sliders size={16} className="text-blue-600" />
+                    <h3 className="text-sm">Cấu hình sinh đề</h3>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium text-slate-500 mb-1 block">Hình vẽ</label>
+                      <select
+                        value={diagramMode}
+                        onChange={(e) => setDiagramMode(e.target.value as DiagramMode)}
+                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 outline-none focus:border-blue-500"
+                      >
+                        <option value="standard">Tiêu chuẩn</option>
+                        <option value="detailed">Cao cấp</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-500 mb-1 block">Lời giải</label>
+                      <select
+                        value={solutionMode}
+                        onChange={(e) => setSolutionMode(e.target.value as SolutionMode)}
+                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 outline-none focus:border-blue-500"
+                      >
+                        <option value="concise">Ngắn gọn</option>
+                        <option value="detailed">Tiêu chuẩn</option>
+                        <option value="very_detailed">Chuyên sâu</option>
+                      </select>
+                    </div>
+
                     <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id as any)}
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === tab.id
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                        : 'text-slate-600 hover:bg-white hover:shadow-sm'
-                        }`}
+                      onClick={() => fileData && handleGenerate(fileData)}
+                      className="w-full py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
                     >
-                      <tab.icon size={18} />
-                      <span className="font-medium text-sm">{tab.label}</span>
+                      <RotateCcw size={14} />
+                      <span>Tạo đề</span>
                     </button>
-                  ))}
-                </nav>
+                  </div>
+                </div>
+
               </div>
             </div>
 
