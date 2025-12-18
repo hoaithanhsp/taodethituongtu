@@ -3,8 +3,8 @@ import { SYSTEM_INSTRUCTION } from "../constants";
 import { GeneratedContent, GenerationOptions } from "../types";
 
 const MODELS = [
-  'gemini-3-pro-preview',
   'gemini-3-flash-preview',
+  'gemini-3-pro-preview',
   'gemini-2.5-flash',
   'gemini-2.5-pro'
 ];
@@ -13,7 +13,9 @@ export const generateExams = async (
   base64Data: string,
   mimeType: string,
   userApiKey?: string,
-  options?: GenerationOptions
+  options?: GenerationOptions,
+  preferredModel?: string
+
 ): Promise<GeneratedContent> => {
   const apiKey = userApiKey || process.env.API_KEY || '';
   if (!apiKey) {
@@ -57,7 +59,16 @@ export const generateExams = async (
 
   const finalSystemInstruction = SYSTEM_INSTRUCTION + customInstructions;
 
-  for (const modelName of MODELS) {
+  // Re-order models if preferredModel is provided
+  let candidateModels = [...MODELS];
+  if (preferredModel && MODELS.includes(preferredModel)) {
+    candidateModels = [
+      preferredModel,
+      ...MODELS.filter(m => m !== preferredModel)
+    ];
+  }
+
+  for (const modelName of candidateModels) {
     try {
       console.log(`Trying model: ${modelName}`);
       const response = await ai.models.generateContent({
