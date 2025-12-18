@@ -66,8 +66,8 @@ Xuất kết quả dưới dạng **Bảng Markdown (Markdown Table) 2 cột**:
 | **Câu 2:** ... | ... |
 
 **LƯU Ý QUAN TRỌNG VỀ LATEX TRONG BẢNG:**
-1. Tuyệt đối **KHÔNG** dùng ký tự `| ` trong công thức Toán/TikZ vì sẽ làm vỡ bảng Markdown.
-2. Hãy thay thế `| ` bằng `\\vert` hoặc `\\lvert`, `\\rvert` trong LaTeX.
+1. Tuyệt đối **KHÔNG** dùng ký tự \`|\` trong công thức Toán/TikZ vì sẽ làm vỡ bảng Markdown.
+2. Hãy thay thế \`|\` bằng \`\\\\vert\` hoặc \`\\\\lvert\`, \`\\\\rvert\` trong LaTeX.
    - Ví dụ SAI: $|x| < 3$
-   - Ví dụ ĐÚNG: $\\lvert x \\rvert < 3$
+   - Ví dụ ĐÚNG: $\\\\lvert x \\\\rvert < 3$
 3. Mỗi câu hỏi là một hàng trong bảng.`;
