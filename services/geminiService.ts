@@ -84,7 +84,7 @@ export const generateExams = async (
             },
             {
               // Adding instruction reference in user prompt effectively reinforces the system instruction
-              text: "Hãy phân tích đề thi này và tạo ra 2 đề thi tương tự theo hướng dẫn hệ thống và các yêu cầu bổ sung về độ chi tiết."
+              text: "Hãy phân tích đề thi này và tạo ra 1 đề thi tương tự kèm lời giải chi tiết theo hướng dẫn hệ thống."
             }
           ]
         },
@@ -99,16 +99,16 @@ export const generateExams = async (
                 type: Type.STRING,
                 description: "Phân tích chi tiết cấu trúc, ma trận đề thi mẫu."
               },
-              exam1: {
+              examContent: {
                 type: Type.STRING,
-                description: "Đề thi tương tự số 1 kèm đáp án chi tiết."
+                description: "Nội dung ĐỀ THI (Bước 1) - Chỉ chứa câu hỏi."
               },
-              exam2: {
+              detailedSolution: {
                 type: Type.STRING,
-                description: "Đề thi tương tự số 2 kèm đáp án chi tiết."
+                description: "Nội dung LỜI GIẢI (Bước 2) - Chứa bảng đáp án và lời giải chi tiết."
               }
             },
-            required: ["analysis", "exam1", "exam2"]
+            required: ["analysis", "examContent", "detailedSolution"]
           }
         }
       });
