@@ -23,17 +23,23 @@ const App: React.FC = () => {
   const [fileData, setFileData] = useState<FileData | null>(null);
 
   // New State for Modes
+  // New State for Modes
   const [diagramMode, setDiagramMode] = useState<DiagramMode>('standard');
   const [solutionMode, setSolutionMode] = useState<SolutionMode>('detailed');
+  const [selectedModel, setSelectedModel] = useState<string>('gemini-3-flash-preview');
 
   React.useEffect(() => {
     const storedKey = localStorage.getItem('GEMINI_API_KEY');
+    const storedModel = localStorage.getItem('GEMINI_SELECTED_MODEL');
     if (storedKey) setApiKey(storedKey);
     else setIsSettingsOpen(true);
+
+    if (storedModel) setSelectedModel(storedModel);
   }, []);
 
   const saveApiKey = (key: string) => {
     localStorage.setItem('GEMINI_API_KEY', key);
+    localStorage.setItem('GEMINI_SELECTED_MODEL', selectedModel);
     setApiKey(key);
     setIsSettingsOpen(false);
   };
@@ -58,7 +64,7 @@ const App: React.FC = () => {
       const generatedContent = await generateExams(data.base64, data.mimeType, apiKey, {
         diagramMode,
         solutionMode
-      });
+      }, selectedModel);
       setResult(generatedContent);
       setStatus(AppStatus.SUCCESS);
     } catch (error: any) {
@@ -234,10 +240,12 @@ const App: React.FC = () => {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all"
+              className="flex items-center space-x-2 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all border border-slate-200"
               title="Cài đặt API Key"
             >
-              <Settings size={20} />
+              <Settings size={18} />
+              <span className="font-medium">Settings (API Key)</span>
+              {!apiKey && <span className="text-red-500 text-xs font-bold animate-pulse">Lấy API key để sử dụng app</span>}
             </button>
 
             {status === AppStatus.SUCCESS && (
@@ -349,7 +357,7 @@ const App: React.FC = () => {
               <RotateCcw size={32} />
             </div>
             <h3 className="text-2xl font-bold text-slate-900 mb-2">Đã xảy ra lỗi</h3>
-            <p className="text-slate-600 mb-4 px-4">
+            <p className="text-red-600 font-medium mb-4 px-4 break-words">
               {errorDetail || "Không thể xử lý đề thi này. Vui lòng kiểm tra lại file hoặc thử lại sau."}
             </p>
             <button
@@ -503,40 +511,38 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <footer className="mt-auto py-10 bg-white border-t border-slate-200">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="mb-6 bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
-            <p className="text-lg font-bold text-slate-800 mb-2">
-              ĐĂNG KÝ KHOÁ HỌC THỰC CHIẾN VIẾT SKKN, TẠO APP DẠY HỌC, TẠO MÔ PHỎNG TRỰC QUAN CHỈ VỚI 1 CÂU LỆNH
+      <footer className="bg-slate-800 text-slate-300 py-8 px-4 mt-auto border-t border-slate-700 no-print">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="mb-6 p-6 bg-gradient-to-r from-blue-900/40 to-indigo-900/40 rounded-2xl border border-blue-500/20 backdrop-blur-sm">
+            <p className="font-bold text-lg md:text-xl text-blue-200 mb-3 leading-relaxed">
+              ĐĂNG KÝ KHOÁ HỌC THỰC CHIẾN VIẾT SKKN, TẠO APP DẠY HỌC, TẠO MÔ PHỎNG TRỰC QUAN <br className="hidden md:block" />
+              <span className="text-yellow-400">CHỈ VỚI 1 CÂU LỆNH</span>
             </p>
             <a
               href="https://tinyurl.com/khoahocAI2025"
               target="_blank"
-              rel="noopener noreferrer"
-              className="text-lg text-blue-600 font-bold hover:text-blue-700 hover:underline"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full transition-all transform hover:-translate-y-1 shadow-lg shadow-blue-900/50"
             >
-              https://tinyurl.com/khoahocAI2025
+              ĐĂNG KÝ NGAY
             </a>
           </div>
 
-          <div className="text-slate-600 space-y-2">
-            <p className="font-semibold text-slate-800">Mọi thông tin vui lòng liên hệ:</p>
-            <div className="space-y-1">
-              <p>
-                <span className="font-medium mr-2">FB:</span>
-                <a
-                  href="https://www.facebook.com/tranhoaithanhvicko/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  https://www.facebook.com/tranhoaithanhvicko/
-                </a>
-              </p>
-              <p>
-                <span className="font-medium mr-2">Zalo:</span>
-                <span className="font-bold text-slate-900">0348296773</span>
-              </p>
+          <div className="space-y-2 text-sm md:text-base">
+            <p className="font-medium text-slate-400">Mọi thông tin vui lòng liên hệ:</p>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6">
+              <a
+                href="https://www.facebook.com/tranhoaithanhvicko/"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-blue-400 transition-colors duration-200 flex items-center gap-2"
+              >
+                <span className="font-bold">Facebook:</span> tranhoaithanhvicko
+              </a>
+              <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+              <span className="hover:text-emerald-400 transition-colors duration-200 cursor-default flex items-center gap-2">
+                <span className="font-bold">Zalo:</span> 0348296773
+              </span>
             </div>
           </div>
         </div>
@@ -579,7 +585,41 @@ const App: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end pt-2">
+
+
+              {/* Model Selection */}
+              <div className="pt-4 border-t border-slate-100">
+                <label className="block text-sm font-medium text-slate-700 mb-3">
+                  Chọn Model AI
+                </label>
+                <div className="grid grid-cols-1 gap-3 max-h-[200px] overflow-y-auto">
+                  {[
+                    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', desc: 'Tốc độ cao, mặc định' },
+                    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', desc: 'Cân bằng tốt' },
+                    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', desc: 'Ổn định, nhanh' },
+                    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', desc: 'Mạnh mẽ nhất' },
+                  ].map((model) => (
+                    <div
+                      key={model.id}
+                      onClick={() => setSelectedModel(model.id)}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${selectedModel === model.id
+                        ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
+                        }`}
+                    >
+                      <div>
+                        <p className={`text-sm font-semibold ${selectedModel === model.id ? 'text-blue-700' : 'text-slate-700'}`}>
+                          {model.name}
+                        </p>
+                        <p className="text-xs text-slate-500">{model.desc}</p>
+                      </div>
+                      {selectedModel === model.id && <CheckCircle size={16} className="text-blue-600" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
                 <button
                   onClick={() => saveApiKey(apiKey)}
                   disabled={!apiKey}
@@ -594,9 +634,9 @@ const App: React.FC = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div >
       )}
-    </div>
+    </div >
   );
 };
 
