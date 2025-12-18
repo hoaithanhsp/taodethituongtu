@@ -170,9 +170,28 @@ const App: React.FC = () => {
     try {
       // 1. Convert Markdown to HTML (keeping LaTeX as raw text by NOT using remark-math)
       // We use remark-gfm to support tables
+      // 0. Pre-process content to fix formatting issues
+      // - Replace literal escaped "\n" with real newlines
+      // - Add double spaces before newlines to force Markdown hard breaks
+      // - Ensure headers have spacing
+      const cleanContent = content
+        .replace(/\\n/g, '\n') // Fix literal \n
+        .replace(/\n/g, '  \n'); // Force hard breaks
+
       const htmlContent = ReactDOMServer.renderToStaticMarkup(
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {content}
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            // Custom styling for paragraphs to ensure separation in Word
+            p: ({ node, ...props }) => <p style={{ marginBottom: '10pt', lineHeight: '1.5' }} {...props} />,
+            // Ensure headers are distinct
+            h1: ({ node, ...props }) => <h1 style={{ fontSize: '18pt', fontWeight: 'bold', marginTop: '12pt', marginBottom: '6pt' }} {...props} />,
+            h2: ({ node, ...props }) => <h2 style={{ fontSize: '16pt', fontWeight: 'bold', marginTop: '12pt', marginBottom: '6pt' }} {...props} />,
+            h3: ({ node, ...props }) => <h3 style={{ fontSize: '14pt', fontWeight: 'bold', marginTop: '10pt', marginBottom: '6pt' }} {...props} />,
+            h4: ({ node, ...props }) => <h4 style={{ fontSize: '12pt', fontWeight: 'bold', marginTop: '10pt', marginBottom: '6pt' }} {...props} />,
+          }}
+        >
+          {cleanContent}
         </ReactMarkdown>
       );
 
