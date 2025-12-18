@@ -47,8 +47,7 @@ const App: React.FC = () => {
   const handleFileSelect = async (data: FileData) => {
     setFileData(data);
     setFileName(data.name);
-    // Auto-generate on first upload
-    await handleGenerate(data);
+    // Auto-generate removed to allow manual trigger
   };
 
   const handleGenerate = async (data: FileData) => {
@@ -320,6 +319,40 @@ const App: React.FC = () => {
 
             <div className="bg-white p-2 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
               <FileUpload onFileSelect={handleFileSelect} isLoading={status === AppStatus.ANALYZING} />
+            </div>
+
+            {/* Manual Generate Trigger */}
+            <div className="mt-8 flex flex-col items-center justify-center space-y-4">
+              {fileName && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium animate-in fade-in slide-in-from-bottom-2">
+                  <CheckCircle size={16} />
+                  <span>Đã chọn: {fileName}</span>
+                </div>
+              )}
+
+              <button
+                onClick={() => fileData && handleGenerate(fileData)}
+                disabled={!fileData || status === AppStatus.ANALYZING}
+                className={`
+                  group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg rounded-full 
+                  shadow-lg shadow-blue-500/30 transition-all duration-300
+                  ${!fileData || status === AppStatus.ANALYZING
+                    ? 'opacity-50 cursor-not-allowed grayscale'
+                    : 'hover:-translate-y-1 hover:shadow-blue-500/50 hover:scale-105 active:scale-95'
+                  }
+                `}
+              >
+                <span className="flex items-center gap-3">
+                  <BrainCircuit size={24} className={status === AppStatus.ANALYZING ? "animate-spin" : ""} />
+                  {status === AppStatus.ANALYZING ? "ĐANG PHÂN TÍCH..." : "TẠO ĐỀ TƯƠNG TỰ"}
+                </span>
+
+                {(!fileData) && (
+                  <span className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs py-1 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    Vui lòng tải lên đề thi trước
+                  </span>
+                )}
+              </button>
             </div>
 
             {status === AppStatus.ANALYZING && (
