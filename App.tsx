@@ -172,10 +172,11 @@ const App: React.FC = () => {
       // We use remark-gfm to support tables
       // 0. Pre-process content to fix formatting issues
       // - Replace literal escaped "\n" with real newlines
+      // - Force newline before options (A., B., C., D.) if they are inline
       // - Add double spaces before newlines to force Markdown hard breaks
-      // - Ensure headers have spacing
       const cleanContent = content
         .replace(/\\n/g, '\n') // Fix literal \n
+        .replace(/([^\n])\s+([A-D]\.)/g, '$1\n$2') // Force newline before options A. B. C. D.
         .replace(/\n/g, '  \n'); // Force hard breaks
 
       const htmlContent = ReactDOMServer.renderToStaticMarkup(
