@@ -589,7 +589,7 @@ const App: React.FC = () => {
               <span className="text-yellow-400">CHỈ VỚI 1 CÂU LỆNH</span>
             </p>
             <a
-              href="https://tinyurl.com/khoahocAI2025"
+              href="https://forms.gle/d7AmcT9MTyGy7bJd8"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full transition-all transform hover:-translate-y-1 shadow-lg shadow-blue-900/50"
